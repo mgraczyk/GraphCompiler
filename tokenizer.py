@@ -39,7 +39,7 @@ class Tokenizer:
     def _ret_from_match(self, line, match):
         return (
                 self._tokens[match.lastindex-1][0],
-                match.start(),
+                (line, match.start()),
                 match.end(),
                 match.group(match.lastindex)
                 )
