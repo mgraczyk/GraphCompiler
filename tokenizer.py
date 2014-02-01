@@ -34,8 +34,7 @@ class Tokenizer:
             if len(line) > 0:
                 tokens.extend(map(partial(self._ret_from_match, lineNum), self._re.finditer(line)))
 
-
-        [print(t) for t in tokens]
+        return tokens
 
     def _ret_from_match(self, line, match):
         return (
@@ -58,7 +57,10 @@ This is a test \\//|/
 sdfasdf | \\ / |              |
 """
 
-    gTok.tokenize(testStr0)
+    print(testStr0)
+    print("-->\n")
+    [print(t) for t in gTok.tokenize(testStr0)]
+    print()
 
 def self_test():
     graph_test()
