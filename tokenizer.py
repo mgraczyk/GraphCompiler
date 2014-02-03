@@ -71,7 +71,7 @@ class Tokenizer:
         return Token(
                 self._tokens[match.lastindex-1][0],
                 Position(line, match.start()),
-                match.end(),
+                match.end() - match.start(),
                 match.group(match.lastindex)
                 )
 
