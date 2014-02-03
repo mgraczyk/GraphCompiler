@@ -45,6 +45,8 @@ class Tokens:
     BSLASH = 2
     FSLASH = 3
     PIPE = 4
+    LANGLE = 5
+    RANGLE = 6
 
 #class DefaultList(list):
     #def __init__(self, fillFactory=None, outOfBoundsFactory=None, fillOnGet=False):
@@ -93,7 +95,7 @@ class AutoGrid():
 
     def get_neighbors(self, row, col, length):
         assert(length > 0)
-
+        
         return filter(operator.truth,
                 chain((self.get(row-1, col+i) for i in range(-1, length+1)),
                       (self.get(row+1, col+i) for i in range(-1, length+1)),
@@ -135,6 +137,7 @@ class EdgeSegmentItem(GridItem):
             # Need to actually compute the 
             self._visited = True
             tok = self._token
+
             neighbors = grid.get_neighbors(tok.position.row, tok.position.col, tok.length)
 
             for neighbor in filter(partial(GridItem.are_attached, self), neighbors):
@@ -222,6 +225,8 @@ class GraphCompiler:
         (Tokens.SPACE, " +"),
         (Tokens.BSLASH, "\\\\"),
         (Tokens.FSLASH, "/"),
+        (Tokens.LANGLE, "<"),
+        (Tokens.RANGLE, "<"),
         (Tokens.PIPE, "\|")))
 
     edgeFactories = {
@@ -229,6 +234,8 @@ class GraphCompiler:
             Tokens.SPACE: lambda *args: None,
             Tokens.BSLASH: EdgeSegmentFactory(2,2, set(((-1,-1), (1,1)))),
             Tokens.FSLASH: EdgeSegmentFactory(2,2, set(((-1,1), (1,-1)))),
+            Tokens.LANGLE: EdgeSegmentFactory(2,2, set(((-1,1), (1,1)))),
+            Tokens.RANGLE: EdgeSegmentFactory(2,2, set(((-1,-1), (1,-1)))),
             Tokens.PIPE: EdgeSegmentFactory(2,6,
                     set(((-1,-1), (-1,0), (-1,1), (1,-1), (1,0), (1,1))))
             }
@@ -305,7 +312,8 @@ def self_test():
 
     tests = [
         "simpletree",
-        "strayedge"
+        "strayedge",
+        "longname"
     ]
 
     for testPath in tests:
