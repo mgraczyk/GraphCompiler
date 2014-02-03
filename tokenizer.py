@@ -6,7 +6,7 @@ from collections import namedtuple
 from functools import partial
 
 Position = namedtuple('Position', ['row', 'col'])
-Token = namedtuple('Token', ['type', 'position', 'len', 'value'])
+Token = namedtuple('Token', ['type', 'position', 'length', 'value'])
 
 class TokenizationError(Exception):
     def __init__(self, errors):
@@ -43,11 +43,11 @@ class Tokenizer:
 
     def tokenize(self, value):
         """ Tokenizes the value.
-            Returns a list of Tokens (type, position, len, value) where
+            Returns a list of Tokens (type, position, length, value) where
 
             type is the token type specified in tokens[i][0]
             position is a Position with the row and column of the token
-            len is the length of the token
+            length is the length of the token
             value is the literal value of the token
 
             If non-tokens are discovered, a TokenizationError is raised.
