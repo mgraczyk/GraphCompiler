@@ -47,6 +47,7 @@ class Tokens:
     PIPE = 4
     LANGLE = 5
     RANGLE = 6
+    TANGLE = 7
 
 #class DefaultList(list):
     #def __init__(self, fillFactory=None, outOfBoundsFactory=None, fillOnGet=False):
@@ -96,10 +97,10 @@ class AutoGrid():
     def get_neighbors(self, row, col, length):
         assert(length > 0)
         
-        return filter(operator.truth,
+        return set(filter(operator.truth,
                 chain((self.get(row-1, col+i) for i in range(-1, length+1)),
                       (self.get(row+1, col+i) for i in range(-1, length+1)),
-                      (self.get(row, col-1), self.get(row, col+1))))
+                      (self.get(row, col-1), self.get(row, col+length+1)))))
 
     def __str__(self):
         return "Grid(\n" + "\n".join(str(row) for row in self._rows) + "\n)"
@@ -109,7 +110,6 @@ class GridItem():
         self._token = token
 
         self._connections = 0
-        self._visited = False
 
     def get_attached(self, grid):
         raise NotImplementedError()
@@ -119,7 +119,8 @@ class GridItem():
 
     @classmethod
     def are_attached(cls, left, right):
-        return left.is_attached_to(right) and right.is_attached_to(left)
+        attached = left.is_attached_to(right) and right.is_attached_to(left)
+        return attached
 
 
 class EdgeSegmentItem(GridItem):
@@ -128,14 +129,18 @@ class EdgeSegmentItem(GridItem):
 
         assert(info)
         self._info = info
+        self._visiting = False
+        self._visited = False
         self._attached = defaultdict(int) # int() -> 0
 
     def get_attached(self, grid):
         # No attached set, but visited means that there's we're cycling
         # In that case just return the empty set
-        if not self._attached and not self._visited:
-            # Need to actually compute the 
-            self._visited = True
+        if self._visiting:
+            return dict()
+
+        if not self._visited:
+            self._visiting = True
             tok = self._token
 
             neighbors = grid.get_neighbors(tok.position.row, tok.position.col, tok.length)
@@ -144,6 +149,9 @@ class EdgeSegmentItem(GridItem):
                 self._connections += 1
                 for k,v in neighbor.get_attached(grid).items():
                     self._attached[k] += v
+
+            self._visiting = False
+            self._visited = True
             
             # TODO: Check that self._attached is not empty
 
@@ -152,7 +160,11 @@ class EdgeSegmentItem(GridItem):
     def is_attached_to(self, other):
         myPos = self._token.position
         otherPos = other._token.position
-        return (otherPos.row - myPos.row, otherPos.col - myPos.col) in self._info._ports
+        rowDiff = otherPos.row - myPos.row
+        colDiff = myPos.col - otherPos.col
+
+        return any(rowDiff == port[0] and 0 <= colDiff + port[1] < other._token.length
+                for port in self._info._ports)
 
     def assert_processed(self):
         if self._connections < self._info.mincon:
@@ -171,8 +183,12 @@ class VertexItem(GridItem):
         return self._attached
 
     def is_attached_to(self, other):
-        # TODO: Implement
-        return True
+        myPos = self._token.position
+        otherPos = other._token.position
+        rowDiff = otherPos.row - myPos.row
+        colDiff = otherPos.col - myPos.col
+
+        return -1 <= rowDiff <= 1 and -1 <= colDiff <= self._token.length
 
     def get_adjacent(self, grid):
         if self._adjacent is None:
@@ -226,8 +242,9 @@ class GraphCompiler:
         (Tokens.BSLASH, "\\\\"),
         (Tokens.FSLASH, "/"),
         (Tokens.LANGLE, "<"),
-        (Tokens.RANGLE, "<"),
-        (Tokens.PIPE, "\|")))
+        (Tokens.RANGLE, ">"),
+        (Tokens.TANGLE, "\\^"),
+        (Tokens.PIPE, "\\|")))
 
     edgeFactories = {
             Tokens.ID: VertexItem,
@@ -236,6 +253,7 @@ class GraphCompiler:
             Tokens.FSLASH: EdgeSegmentFactory(2,2, set(((-1,1), (1,-1)))),
             Tokens.LANGLE: EdgeSegmentFactory(2,2, set(((-1,1), (1,1)))),
             Tokens.RANGLE: EdgeSegmentFactory(2,2, set(((-1,-1), (1,-1)))),
+            Tokens.TANGLE: EdgeSegmentFactory(2,2, set(((1,-1), (1,1)))),
             Tokens.PIPE: EdgeSegmentFactory(2,6,
                     set(((-1,-1), (-1,0), (-1,1), (1,-1), (1,0), (1,1))))
             }
@@ -313,7 +331,9 @@ def self_test():
     tests = [
         "simpletree",
         "strayedge",
-        "longname"
+        "longname",
+        "1cycle",
+        "2cycle"
     ]
 
     for testPath in tests:
