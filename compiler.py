@@ -333,7 +333,8 @@ def self_test():
         "strayedge",
         "longname",
         "1cycle",
-        "2cycle"
+        "2cycle",
+        "edgelooperror"
     ]
 
     for testPath in tests:
