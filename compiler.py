@@ -99,7 +99,7 @@ class AutoGrid():
         return set(filter(operator.truth,
                 chain((self.get(row-1, col+i) for i in range(-1, length+1)),
                       (self.get(row+1, col+i) for i in range(-1, length+1)),
-                      (self.get(row, col-1), self.get(row, col+length+1)))))
+                      (self.get(row, col-1), self.get(row, col+length)))))
 
     def __str__(self):
         return "Grid(\n" + "\n".join(str(row) for row in self._rows) + "\n)"
