@@ -8,7 +8,6 @@ from functools import partial
 from itertools import chain
 
 from tokenizer import Tokenizer
-from tokenizer import TokenizationError
 
 def compose(f, g):
     def composition(*args, **kwargs):
@@ -322,39 +321,6 @@ class GraphCompiler:
 
         return grid, vertices, edgeSegments
 
-
-def self_test():
-    import os
-
-    comp = GraphCompiler()
-
-    tests = [
-        "simpletree",
-        "strayedge",
-        "longname",
-        "1cycle",
-        "2cycle",
-        "edgelooperror"
-    ]
-
-    for testPath in tests:
-        teststr = open(os.path.join("tests", testPath + ".graph"), "r").read()
-        print(teststr)
-        print("-->\n")
-
-        try:
-            (verts, adj) = comp.compile(teststr)
-            print("Vertices = ")
-            [print(v) for v in verts]
-            print()
-            print("Adj = ")
-            [print(r) for r in adj]
-            print('\n')
-        except (TokenizationError, GraphCompilerError) as e:
-            print(e)
-        print()
-
-
-
 if __name__ == "__main__":
-    self_test()
+    import test
+    exit(test.compiler_test())

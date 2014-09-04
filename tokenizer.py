@@ -88,35 +88,6 @@ class Tokenizer:
         if start < len(line):
             yield (Position(lineNum, start), line[start:])
 
-def graph_test():
-    import os
-
-    gTok = Tokenizer((
-        ("id", "[_a-zA-Z0-9]+"),
-        ("space", " +"),
-        ("bslash", "\\\\"),
-        ("fslash", "/"),
-        ("pipe", "\|")))
-
-    tests = [
-        "simpletree",
-        "simpleerrors",
-        "errors"
-    ]
-
-    for testPath in tests:
-        teststr = open(os.path.join("tests", testPath + ".graph"), "r").read()
-        print(teststr)
-        print("-->\n")
-
-        try:
-            [print(t) for t in gTok.tokenize(teststr)]
-        except TokenizationError as e:
-            print(e)
-        print()
-
-def self_test():
-    graph_test()
-    
 if __name__ == "__main__":
-    self_test()
+    import test
+    exit(test.tokenizer_test())
