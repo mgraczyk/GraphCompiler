@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#!/usr/bin/env python3
 
 import operator
 
@@ -285,7 +285,6 @@ class GraphCompiler:
         # TODO: Do something about non-unique vertices
 
         grid, vertices, edgeSegments = self._get_grid(tokens)
-        adj = [[0]*i for i in range(1, len(vertices)+1)]
 
         adjacencies = {}
         vertNums = {}
@@ -293,6 +292,7 @@ class GraphCompiler:
             vertNums[v.get_key()] = vNum
             adjacencies[v.get_key()] = v.get_adjacent(grid)
 
+        adj = [[0]*i for i in range(1, len(vertices)+1)]
         for vert0, connections in adjacencies.items():
             for vert1, elem in connections.items():
                 adjC, adjR = sorted((vertNums[vert0], vertNums[vert1]))
