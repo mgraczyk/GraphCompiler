@@ -47,21 +47,7 @@ class Tokens:
     LANGLE = 5
     RANGLE = 6
     TANGLE = 7
-
-#class DefaultList(list):
-    #def __init__(self, fillFactory=None, outOfBoundsFactory=None, fillOnGet=False):
-        #self._fillFactory = fillFactory
-        #self._oobFactory = outOfBoundsFactory
-        #self._fillOnGet = fillOnGet
-
-    #def __setitem__(self, key, value):
-        #return super().__setitem__(key, value)
-
-    #def __getitem__(self, key, value):
-        #try:
-            #return super().__getitem__(key, value)
-        #except IndexError:
-            #pass
+    DASH = 8
 
 class AutoGrid():
     """ Automatically resizing grid.
@@ -104,7 +90,7 @@ class AutoGrid():
     def __str__(self):
         return "Grid(\n" + "\n".join(str(row) for row in self._rows) + "\n)"
 
-class GridItem():
+class GridItem(object):
     def __init__(self, token):
         self._token = token
 
@@ -211,7 +197,7 @@ class VertexItem(GridItem):
     def get_key(self):
         return self._token
 
-class EdgeSegmentFactory:
+class EdgeSegmentFactory(object):
     def __init__(self, mincon, maxcon, ports):
         assert(mincon <= len(ports) <= maxcon)
 
@@ -243,6 +229,7 @@ class GraphCompiler:
         (Tokens.LANGLE, "<"),
         (Tokens.RANGLE, ">"),
         (Tokens.TANGLE, "\\^"),
+        (Tokens.DASH, "-"),
         (Tokens.PIPE, "\\|")))
 
     edgeFactories = {
@@ -253,6 +240,7 @@ class GraphCompiler:
             Tokens.LANGLE: EdgeSegmentFactory(2,2, set(((-1,1), (1,1)))),
             Tokens.RANGLE: EdgeSegmentFactory(2,2, set(((-1,-1), (1,-1)))),
             Tokens.TANGLE: EdgeSegmentFactory(2,2, set(((1,-1), (1,1)))),
+            Tokens.DASH: EdgeSegmentFactory(2,2, set(((0,1), (0,-1)))),
             Tokens.PIPE: EdgeSegmentFactory(2,6,
                     set(((-1,-1), (-1,0), (-1,1), (1,-1), (1,0), (1,1))))
             }
